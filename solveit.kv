@@ -1,39 +1,36 @@
-#:kivy 2.1.0
+<RootWidget>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
 
-<SolveItApp>:
-    BoxLayout:
-        orientation: 'vertical'
-        padding: 10
-        spacing: 10
+    Label:
+        text: "SolveIt - Crowdsourced Solutions"
+        size_hint_y: None
+        height: 40
+        font_size: 20
 
-        Label:
-            text: "SolveIt - Crowdsourced Solutions"
+    ScrollView:
+        GridLayout:
+            id: questions_list
+            cols: 1
             size_hint_y: None
-            height: 40
-            font_size: 20
-
-        ScrollView:
-            GridLayout:
-                id: questions_list
-                cols: 1
-                size_hint_y: None
-                height: self.minimum_height
-                row_default_height: 60
-                spacing: 5
-
-        BoxLayout:
-            size_hint_y: None
-            height: 40
+            height: self.minimum_height
+            row_default_height: 60
             spacing: 5
 
-            TextInput:
-                id: question_title
-                hint_text: "Question title"
+    BoxLayout:
+        size_hint_y: None
+        height: 40
+        spacing: 5
 
-            TextInput:
-                id: question_desc
-                hint_text: "Description"
+        TextInput:
+            id: question_title
+            hint_text: "Question title"
 
-            Button:
-                text: "Add Question"
-                on_press: app.add_question()
+        TextInput:
+            id: question_desc
+            hint_text: "Description"
+
+        Button:
+            text: "Add Question"
+            on_press: app.add_question()
