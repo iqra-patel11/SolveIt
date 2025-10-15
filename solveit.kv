@@ -1,36 +1,115 @@
 <RootWidget>:
-    orientation: 'vertical'
-    padding: 10
-    spacing: 10
+    LoginScreen:
+        name: "login"
+    HomeScreen:
+        name: "home"
 
-    Label:
-        text: "SolveIt - Crowdsourced Solutions"
-        size_hint_y: None
-        height: 40
-        font_size: 20
-
-    ScrollView:
-        GridLayout:
-            id: questions_list
-            cols: 1
-            size_hint_y: None
-            height: self.minimum_height
-            row_default_height: 60
-            spacing: 5
+<LoginScreen>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
     BoxLayout:
-        size_hint_y: None
-        height: 40
-        spacing: 5
+        orientation: 'vertical'
+        spacing: 20
+        size_hint: 0.4, 0.5
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+        Label:
+            text: "SolveIt Login"
+            font_size: 36
+            color: 0.5,0,0,1
+            bold: True
+            size_hint_y: None
+            height: 60
 
         TextInput:
-            id: question_title
-            hint_text: "Question title"
+            id: username_input
+            hint_text: "Username"
+            size_hint_y: None
+            height: 40
+            multiline: False
+            padding: [10,10,10,10]
 
         TextInput:
-            id: question_desc
-            hint_text: "Description"
+            id: password_input
+            hint_text: "Password"
+            password: True
+            size_hint_y: None
+            height: 40
+            multiline: False
+            padding: [10,10,10,10]
 
         Button:
-            text: "Add Question"
-            on_press: app.add_question()
+            text: "Login"
+            size_hint_y: None
+            height: 50
+            background_color: 0.5,0,0,1
+            color: 1,1,1,1
+            bold: True
+            on_press:
+                app.login(username_input.text, password_input.text)
+
+<HomeScreen>:
+    canvas.before:
+        Color:
+            rgba: 1,1,1,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        # Search bar
+        TextInput:
+            id: search_input
+            hint_text: "Search questions..."
+            size_hint_y: None
+            height: 40
+            multiline: False
+            padding: [10,10,10,10]
+            on_text: app.search_questions(self.text)
+
+        # Scrollable question list
+        ScrollView:
+            GridLayout:
+                id: questions_list
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: 120
+                spacing: 10
+
+        # Add question section
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 5
+
+            TextInput:
+                id: question_title
+                hint_text: "Question title"
+                multiline: False
+                padding: [10,10,10,10]
+
+            TextInput:
+                id: question_desc
+                hint_text: "Description"
+                multiline: False
+                padding: [10,10,10,10]
+
+            Button:
+                text: "Add Question"
+                background_color: 0.5,0,0,1
+                color: 1,1,1,1
+                bold: True
+                on_press:
+                    app.add_question(question_title.text, question_desc.text)
+                    question_title.text = ""
+                    question_desc.text = ""

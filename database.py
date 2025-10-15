@@ -1,61 +1,67 @@
 import sqlite3
 
-DB_FILE = 'app.db'
-
 def init_db():
-    """Create database and tables if they don't exist"""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect("solveit.db")
     c = conn.cursor()
-
-    # Create questions table
-    c.execute('''
-    CREATE TABLE IF NOT EXISTS questions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        description TEXT
-    )
-    ''')
-
-    # Create answers table
-    c.execute('''
-    CREATE TABLE IF NOT EXISTS answers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        question_id INTEGER,
-        answer TEXT,
-        FOREIGN KEY (question_id) REFERENCES questions(id)
-    )
-    ''')
-
+    # Users table
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT
+        )
+    """)
+    # Questions table
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS questions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            title TEXT,
+            description TEXT,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
     conn.commit()
     conn.close()
 
-# Functions to interact with database
-def add_question(title, description):
-    conn = sqlite3.connect(DB_FILE)
+def add_user(username, password):
+    conn = sqlite3.connect("solveit.db")
     c = conn.cursor()
-    c.execute('INSERT INTO questions (title, description) VALUES (?, ?)', (title, description))
+    try:
+        c.execute("INSERT INTO users(username, password) VALUES (?,?)", (username, password))
+        conn.commit()
+        user_id = c.lastrowid
+    except sqlite3.IntegrityError:
+        # username exists
+        c.execute("SELECT id FROM users WHERE username=?", (username,))
+        user_id = c.fetchone()[0]
+    conn.close()
+    return user_id
+
+def get_user_by_username(username):
+    conn = sqlite3.connect("solveit.db")
+    c = conn.cursor()
+    c.execute("SELECT id, password FROM users WHERE username=?", (username,))
+    user = c.fetchone()
+    conn.close()
+    return user
+
+def add_question(user_id, title, description):
+    conn = sqlite3.connect("solveit.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO questions(user_id, title, description) VALUES (?,?,?)", (user_id, title, description))
     conn.commit()
     conn.close()
 
 def get_questions():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect("solveit.db")
     c = conn.cursor()
-    c.execute('SELECT * FROM questions')
-    data = c.fetchall()
+    c.execute("""
+        SELECT q.id, q.title, q.description, u.username
+        FROM questions q
+        JOIN users u ON q.user_id = u.id
+        ORDER BY q.id DESC
+    """)
+    questions = c.fetchall()
     conn.close()
-    return data
-
-def add_answer(question_id, answer):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('INSERT INTO answers (question_id, answer) VALUES (?, ?)', (question_id, answer))
-    conn.commit()
-    conn.close()
-
-def get_answers(question_id):
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('SELECT answer FROM answers WHERE question_id=?', (question_id,))
-    data = c.fetchall()
-    conn.close()
-    return [d[0] for d in data]
+    return questions
